@@ -1,0 +1,71 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: nfs-server
+  name: nfs-server
+spec:
+  replicas: 1
+  selector:
+    app: nfs-server
+    deploymentconfig: nfs-server
+  template:
+    metadata:
+      labels:
+        app: nfs-server
+        deploymentconfig: nfs-server
+    spec:
+      serviceAccountName: nfs-server
+      containers:
+      - name: nfs-server
+        command:
+        - /usr/local/bin/run_nfs.sh
+        - -G
+        - "0"
+        - /exports/0
+        - /exports/1
+        - /exports/2
+        - /exports/3
+        - /exports/4
+        image: nfs-server
+        ports:
+          - name: nfs
+            containerPort: 2049
+          - name: mountd
+            containerPort: 20048
+          - name: rpcbind
+            containerPort: 111
+        securityContext:
+          privileged: true
+        volumeMounts:
+          - mountPath: /exports
+            name: mypvc
+      volumes:
+        - name: mypvc
+          emptyDir: {}
+  triggers:
+  - type: ConfigChange
+    imageChangeParams:
+      automatic: true
+      containerNames:
+      - nfs-server
+      from:
+        kind: ImageStreamTag
+        name: nfs-server:latest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nfs-server
+  name: nfs-server
+spec:
+  ports:
+    - name: nfs
+      port: 2049
+    - name: mountd
+      port: 20048
+    - name: rpcbind
+      port: 111
+  selector:
+    app: nfs-server

@@ -1,0 +1,39 @@
+# Use this to troubleshoot any NFS mounting issues. Before you import this
+# OpenShift, remember to execute the following:
+# 1. oc create sa nfs-client
+# 2. oc adm policy add-scc-to-user -z nfs-client anyuid
+# 3. oc adm policy add-scc-to-user -z nfs-client privileged
+#
+# After the pod comes up, oc rsh into it and execute the following:
+# yum install -y nfs-utils
+#
+# You can then try to mount from the server with the following command:
+# mount -o nolock,ro nfs-server.nfs.svc.cluster.local:/exports/0 /mnt
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  labels:
+    app: nfs-troubleshoot
+  name: nfs-troubleshoot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: nfs-troubleshoot
+  template:
+    metadata:
+      labels:
+        name: nfs-troubleshoot
+    spec:
+      serviceAccountName: nfs-client
+      containers:
+      - image: centos:7
+        command:
+          - sh
+          - -c
+          - 'while true; do sleep 10; done'
+        imagePullPolicy: IfNotPresent
+        name: busybox
+        securityContext:
+          privileged: true
