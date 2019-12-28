@@ -1,5 +1,19 @@
-apiVersion: apps.openshift.io/v1
-kind: DeploymentConfig
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  labels:
+    app: nfs-server
+  name: nfs-server
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: "gp2"
+  resources:
+    requests:
+      storage: 6Gi
+---
+apiVersion: apps/v1
+kind: StatefulSet
 metadata:
   labels:
     app: nfs-server
@@ -7,13 +21,14 @@ metadata:
 spec:
   replicas: 1
   selector:
-    app: nfs-server
-    deploymentconfig: nfs-server
+    matchLabels:
+      app: nfs-server
+      statefulset: nfs-server
   template:
     metadata:
       labels:
         app: nfs-server
-        deploymentconfig: nfs-server
+        statefulset: nfs-server
     spec:
       serviceAccountName: nfs-server
       containers:
@@ -30,7 +45,7 @@ spec:
         - "5"
         - "6"
         - "7"
-        image: nfs-server
+        image: ""
         ports:
           - name: nfs
             containerPort: 2049
@@ -42,19 +57,11 @@ spec:
           privileged: true
         volumeMounts:
           - mountPath: /exports
-            name: mypvc
+            name: pvc-nfs-server
       volumes:
-        - name: mypvc
-          emptyDir: {}
-  triggers:
-  - type: ConfigChange
-    imageChangeParams:
-      automatic: true
-      containerNames:
-      - nfs-server
-      from:
-        kind: ImageStreamTag
-        name: nfs-server:latest
+        - name: pvc-nfs-server
+          persistentVolumeClaim:
+            claimName: nfs-server
 ---
 apiVersion: v1
 kind: Service

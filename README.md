@@ -1,8 +1,8 @@
-# OpenShift Ephemeral NFS Server
+# OpenShift NFS Server
 
-This deploys an NFS server in a pod and creates a few persistent volumes that connect to the NFS server.
+This deploys an NFS server in a stateful set and creates a few persistent volumes that connect to the NFS server.
 
-**Note**: The pod uses an `emptyDir` volume as storage - so all data will disappear when the pod goes away.
+**Note**: The pod uses a gp2 pvc as storage. If your cluster uses a different storage class, you will need to modify the pvc in `yaml/nfs-server.yml`.
 
 This is based on the configuration at <https://github.com/mappedinn/kubernetes-nfs-volume-on-gke>.
 

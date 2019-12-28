@@ -55,6 +55,9 @@ oc adm policy add-scc-to-user privileged -z $SA
 
 oc create -f ../yaml/nfs-server.yml
 
+# Point the image to the imagestream.
+oc set triggers statefulset/nfs-server --from-image nfs-server:latest -c nfs-server
+
 # This is a hack - we can't use the .svc.cluster.local service address as the
 # NFS server address in OpenShift 4.2.
 NFS_SERVER=$(oc get svc/nfs-server -o jsonpath='{.spec.clusterIP}')
