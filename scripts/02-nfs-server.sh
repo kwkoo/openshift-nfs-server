@@ -21,9 +21,8 @@ function create_pv() {
     sed \
       -e "s/name: .*/name: $1/" \
       -e "s/storage: .*/storage: $2/" \
-      -e "s/- ReadWriteMany/- $3/" \
-      -e "s/server: .*/server: $4/" \
-      -e "s|path: .*|path: $5|" \
+      -e "s/server: .*/server: $3/" \
+      -e "s|path: .*|path: $4|" \
     | \
     oc apply -f -
 }
@@ -64,11 +63,17 @@ echo "NFS server IP address is ${NFS_SERVER}"
 
 set +e
 
-echo "Creating RWX persistent volume"
-create_pv nfs-0 20Gi ReadWriteMany $NFS_SERVER /exports/0
+echo "Creating 1Gi persistent volumes"
+for i in {0..3}; do
+    create_pv nfs-$i 1Gi $NFS_SERVER /$i
+done
 
+echo "Creating 2Gi persistent volumes"
+for i in 4 5; do
+    create_pv nfs-$i 2Gi $NFS_SERVER /$i
+done
 
-echo "Creating RWO persistent volumes"
-for i in 1 2 3 4; do
-    create_pv nfs-$i 1Gi ReadWriteOnce $NFS_SERVER /exports/$i
+echo "Creating 4Gi persistent volumes"
+for i in 6 7; do
+    create_pv nfs-$i 4Gi $NFS_SERVER /$i
 done

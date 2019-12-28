@@ -9,8 +9,12 @@ spec:
   capacity:
     storage: 1Gi
   accessModes:
+    - ReadWriteOnce
+    - ReadOnlyMany
     - ReadWriteMany
   persistentVolumeReclaimPolicy: Recycle
   nfs:
     server: NFSSERVERIP
     path: NFSEXPORTPATH
+  mountOptions:
+    - vers=4

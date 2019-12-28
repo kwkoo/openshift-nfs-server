@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+NFSROOT=/exports
+
 function start()
 {
 
@@ -27,20 +29,22 @@ function start()
     shift $(($OPTIND - 1))
 
     # prepare /etc/exports
+    mkdir $NFSROOT
+    chown root:root $NFSROOT
+    if [ -v gid ] ; then
+        chmod 777 $NFSROOT
+        chgrp $gid $NFSROOT
+    fi
+    echo "$NFSROOT *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports
+
     for i in "$@"; do
-        # fsid=0: needed for NFSv4
-        echo "$i *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports
-        if [ ! -d $i ]; then
-            mkdir -p $i
+        if [ ! -d $NFSROOT/$i ]; then
+            mkdir -p $NFSROOT/$i
         fi
         if [ -v gid ] ; then
-            chmod 070 $i
-            chgrp $gid $i
+            chmod 777 $NFSROOT/$i
+            chgrp $gid $NFSROOT/$i
         fi
-        # move index.html to here
-        #/bin/cp /tmp/index.html $i/
-        #chmod 644 $i/index.html
-        echo "Serving $i"
     done
   
     # start rpcbind if it is not started yet
