@@ -35,7 +35,7 @@ function start()
         chmod 777 $NFSROOT
         chgrp $gid $NFSROOT
     fi
-    echo "$NFSROOT *(rw,fsid=0,insecure,no_root_squash)" >> /etc/exports
+    echo "$NFSROOT *(rw,fsid=0,insecure,no_root_squash,no_wdelay)" >> /etc/exports
 
     for i in "$@"; do
         if [ ! -d $NFSROOT/$i ]; then
