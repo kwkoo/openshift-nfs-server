@@ -40,23 +40,20 @@ if [ $? -eq 0 ]; then
     exit 1
 fi
 
-cd ../volume-nfs
+cd ${BASE}/../volume-nfs
 oc project default &> /dev/null
 
 set -e
 
 oc new-project $PROJ &> /dev/null
-oc new-build --strategy docker --binary --name $IS -l app=$APP
-oc start-build $IS --from-dir . --follow
+oc new-build --strategy docker --binary -n $PROJ --name $IS -l app=$APP
+oc start-build $IS -n $PROJ --from-dir . --follow
 
 oc create sa $SA
 oc adm policy add-scc-to-user anyuid -z $SA
 oc adm policy add-scc-to-user privileged -z $SA
 
-oc create -f ../yaml/nfs-server.yml
-
-# Point the image to the imagestream.
-oc set triggers statefulset/nfs-server --from-image nfs-server:latest -c nfs-server
+sed "s|DOCKERIMAGEREFERENCE|$(oc get istag/nfs-server:latest -o jsonpath='{.image.dockerImageReference}')|" ${BASE}/../yaml/nfs-server.yml | oc apply -n $PROJ -f -
 
 # This is a hack - we can't use the .svc.cluster.local service address as the
 # NFS server address in OpenShift 4.2.

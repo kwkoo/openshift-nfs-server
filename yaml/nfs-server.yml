@@ -45,7 +45,7 @@ spec:
         - "5"
         - "6"
         - "7"
-        image: ""
+        image: DOCKERIMAGEREFERENCE
         ports:
           - name: nfs
             containerPort: 2049
