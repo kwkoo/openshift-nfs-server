@@ -10,7 +10,7 @@
 # You can then try to mount from the server with the following command:
 # mount -o nolock,ro nfs-server.nfs.svc.cluster.local:/exports/0 /mnt
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:

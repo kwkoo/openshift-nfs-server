@@ -9,24 +9,6 @@ cd $(dirname $0)
 BASE=$(pwd)
 cd - >> /dev/null
 
-function create_pv() {
-    echo "Deleting pv/nfs-$i..."
-    oc delete pv/nfs-$i &> /dev/null
-    if [ $? -eq 0 ]; then
-        sleep 0.5
-    fi
-    echo "Creating pv/nfs-$i..."
-    cat ${BASE}/../yaml/pv.yml \
-    | \
-    sed \
-      -e "s/name: .*/name: $1/" \
-      -e "s/storage: .*/storage: $2/" \
-      -e "s/server: .*/server: $3/" \
-      -e "s|path: .*|path: $4|" \
-    | \
-    oc apply -f -
-}
-
 
 which oc 2>&1 >> /dev/null
 if [ $? -ne 0 ]; then
@@ -61,19 +43,9 @@ NFS_SERVER=$(oc get svc/nfs-server -o jsonpath='{.spec.clusterIP}')
 
 echo "NFS server IP address is ${NFS_SERVER}"
 
+# Provision nfs-client-provisioner
 set +e
-
-echo "Creating 1Gi persistent volumes"
-for i in {0..3}; do
-    create_pv nfs-$i 1Gi $NFS_SERVER /$i
-done
-
-echo "Creating 2Gi persistent volumes"
-for i in 4 5; do
-    create_pv nfs-$i 2Gi $NFS_SERVER /$i
-done
-
-echo "Creating 4Gi persistent volumes"
-for i in 6 7; do
-    create_pv nfs-$i 4Gi $NFS_SERVER /$i
-done
+cat ${BASE}/../yaml/nfs-subdir-external-provisioner/rbac.yaml | sed -e "s|NAMESPACE|${PROJ}|g" | oc apply -f -
+oc apply -f ${BASE}/../yaml/nfs-subdir-external-provisioner/scc.yaml
+oc adm policy add-scc-to-user nfs-admin -z nfs-client-provisioner -n $PROJ
+cat ${BASE}/../yaml/nfs-subdir-external-provisioner/deployment.yaml | sed -e "s|NAMESPACE|${PROJ}|g" -e "s|NFSSERVERIP|${NFS_SERVER}|g" -e "s|NFSPATH|/|g" | oc apply -f -

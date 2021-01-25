@@ -1,6 +1,6 @@
 # OpenShift NFS Server
 
-This deploys an NFS server in a stateful set and creates a few persistent volumes that connect to the NFS server.
+This deploys an NFS server in a stateful set and deploys a [nfs-client-provisioner](https://github.com/kubernetes-sigs/nfs-subdir-external-provisioner.git) to dynamically provision persistent volumes.
 
 **Note**: The pod uses a gp2 pvc as storage. If your cluster uses a different storage class, you will need to modify the pvc in `yaml/nfs-server.yml`.
 

@@ -10,10 +10,10 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
-oc get storageclass/manual &> /dev/null
+oc get storageclass/managed-nfs-storage &> /dev/null
 if [ $? -eq 0 ]; then
-    echo "manual storageclass exists - removing it"
-    oc delete storageclass/manual
+    echo "managed-nfs-storage storageclass exists - removing it"
+    oc delete storageclass/managed-nfs-storage
 fi
 
 echo "setting remaining storage classes to non-default"
@@ -21,5 +21,5 @@ for  sc in $(oc get storageclass -o name); do
     oc patch $sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "false"}}}'
 done
 
-echo "importing new manual storageclass"
-oc create -f ${BASE}/../yaml/storage-class.yml
+echo "importing new managed-nfs-storage storageclass"
+oc create -f ${BASE}/../yaml/nfs-subdir-external-provisioner/class.yaml

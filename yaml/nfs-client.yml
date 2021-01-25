@@ -7,7 +7,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: "manual"
+  storageClassName: "managed-nfs-storage"
   resources:
     requests:
       storage: 1Mi
@@ -15,7 +15,7 @@ spec:
 # This mounts the nfs volume claim into /mnt and continuously
 # overwrites /mnt/index.html with the time and hostname of the pod.
 
-apiVersion: extensions/v1beta1
+apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
