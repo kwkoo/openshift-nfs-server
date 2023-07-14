@@ -1,7 +1,17 @@
 #!/bin/bash
 
-oc delete -n nfs statefulset/nfs-server
-oc delete -n nfs pvc/nfs-server
+PROJ=nfs
+
+cd $(dirname $0)
+BASE=$(pwd)
+cd - >> /dev/null
+
+for f in ${BASE}/../yaml/nfs-subdir-external-provisioner/*.yaml; do
+  PROJ=$PROJ envsubst < $f | oc delete -f -
+done
+
+oc delete -n $PROJ sts,svc,pvc,is,istag -l app=nfs-server
+oc delete -n $PROJ sa nfs-server
 oc get pv -o name | grep nfs- | xargs oc delete
 oc project default
-oc delete project nfs
+oc delete project $PROJ

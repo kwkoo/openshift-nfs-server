@@ -5,7 +5,7 @@ metadata:
   labels:
     app: nfs-client-provisioner
   # replace with namespace where provisioner is deployed
-  namespace: NAMESPACE
+  namespace: $PROJ
 spec:
   replicas: 1
   strategy:
@@ -29,11 +29,11 @@ spec:
             - name: PROVISIONER_NAME
               value: k8s-sigs.io/nfs-subdir-external-provisioner
             - name: NFS_SERVER
-              value: NFSSERVERIP
+              value: $NFSSERVERIP
             - name: NFS_PATH
-              value: NFSPATH
+              value: $NFSPATH
       volumes:
         - name: nfs-client-root
           nfs:
-            server: NFSSERVERIP
-            path: NFSPATH
+            server: $NFSSERVERIP
+            path: $NFSPATH
